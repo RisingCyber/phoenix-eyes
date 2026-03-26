@@ -49,7 +49,7 @@ To run it, clone the repo and execute python3 server.py  (thats it, no environme
 
 # 2. unzip phoenix-eyes-v2
 
-# 3. cd phoenix-eyes-v2.zip 
+# 3. cd phoenix-eyes-v2 
 
 # 4. python3 phoenix-eyes-v2/server.py
 
