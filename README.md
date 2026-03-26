@@ -55,7 +55,7 @@ To run it, clone the repo and execute python3 server.py  (thats it, no environme
 
 # 5. Open http://localhost:8080   
 
-(thats it, NO environment variables, no API keys, no build step, no dependencies)
+(thats it, NO environment variables, NO API keys, NO build step, NO dependencies)
 
 
 
