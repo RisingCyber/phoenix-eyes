@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>PHOENIX EYES v2</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600&display=swap"/>
+<style>
+:root{--bg:#07090d;--panel:#0c1018;--panel2:#111825;--border:rgba(0,212,255,.12);--border2:rgba(0,212,255,.3);--cyan:#00d4ff;--green:#39ff14;--amber:#ff9500;--red:#ff3b30;--purple:#bf5fff;--teal:#00bfa5;--muted:#3a5060;--muted2:#5a7080;--text:#bcd8e8;--mono:"Share Tech Mono",monospace;--sans:"Rajdhani",sans-serif}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--sans)}
+#app{display:flex;flex-direction:column;height:100vh}
+#hdr{flex-shrink:0;height:50px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;background:var(--panel);border-bottom:1px solid var(--border2);z-index:1000;gap:12px}
+.logo-t{font-family:var(--mono);font-size:17px;letter-spacing:.14em;color:var(--cyan);text-shadow:0 0 14px rgba(0,212,255,.45)}
+.logo-s{font-family:var(--mono);font-size:9px;color:var(--muted2);letter-spacing:.08em}
+.pills{display:flex;gap:5px;flex-wrap:wrap}
+.pill{font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:2px;display:flex;align-items:center;gap:4px}
+.pill-g{background:rgba(57,255,20,.08);color:var(--green);border:1px solid rgba(57,255,20,.25)}
+.pill-r{background:rgba(255,59,48,.08);color:var(--red);border:1px solid rgba(255,59,48,.25)}
+.pill-a{background:rgba(255,149,0,.08);color:var(--amber);border:1px solid rgba(255,149,0,.25)}
+.pill-p{background:rgba(191,95,255,.08);color:var(--purple);border:1px solid rgba(191,95,255,.25)}
+.dot{width:5px;height:5px;border-radius:50%;animation:blink 1.5s infinite}
+.dg{background:var(--green);box-shadow:0 0 5px var(--green)}.dr{background:var(--red);box-shadow:0 0 5px var(--red)}.da{background:var(--amber);box-shadow:0 0 5px var(--amber)}.dp{background:var(--purple);box-shadow:0 0 5px var(--purple)}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+#clk{font-family:var(--mono);font-size:12px;color:var(--cyan);letter-spacing:.07em;flex-shrink:0}
+#body{flex:1;display:flex;min-height:0}
+#sb{width:232px;flex-shrink:0;background:var(--panel);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden;z-index:500}
+#sb::-webkit-scrollbar{width:3px}
+#sb::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.sec{border-bottom:1px solid var(--border);padding:10px 12px}
+.sec-t{font-family:var(--mono);font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted2);margin-bottom:8px}
+.lr{display:flex;align-items:center;justify-content:space-between;padding:5px 0;cursor:pointer;border-radius:3px;transition:background .1s}
+.lr:hover{background:rgba(255,255,255,.03)}
+.ll{display:flex;align-items:center;gap:7px}
+.ld{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.ln{font-size:12.5px;font-weight:500;color:var(--text)}
+.ls{font-family:var(--mono);font-size:8.5px;color:var(--muted2)}
+.tog{position:relative;width:30px;height:16px;flex-shrink:0}
+.tog input{opacity:0;width:0;height:0}
+.tg{position:absolute;inset:0;border-radius:16px;background:rgba(255,255,255,.07);border:1px solid var(--border);cursor:pointer;transition:background .2s}
+.tg::after{content:"";position:absolute;top:2px;left:2px;width:10px;height:10px;border-radius:50%;background:var(--muted);transition:transform .2s,background .2s}
+.tog input:checked+.tg{background:rgba(0,212,255,.18);border-color:var(--cyan)}
+.tog input:checked+.tg::after{transform:translateX(14px);background:var(--cyan);box-shadow:0 0 5px var(--cyan)}
+.op-row{display:flex;align-items:center;gap:6px;padding:3px 0}
+.op-lbl{font-family:var(--mono);font-size:8.5px;color:var(--muted2);width:72px;letter-spacing:.04em}
+.op-row input[type=range]{flex:1;height:3px;accent-color:var(--cyan);cursor:pointer}
+.op-v{font-family:var(--mono);font-size:9px;color:var(--cyan);width:26px;text-align:right}
+.stat-g{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.stat-b{background:var(--panel2);border:1px solid var(--border);border-radius:3px;padding:7px 9px}
+.stat-v{font-family:var(--mono);font-size:18px;color:var(--cyan);line-height:1}
+.stat-l{font-family:var(--mono);font-size:8px;color:var(--muted2);letter-spacing:.06em;margin-top:2px}
+.mbtn{display:flex;align-items:center;gap:6px;padding:5px 9px;margin:2px 0;border:1px solid var(--border);border-radius:3px;background:transparent;color:var(--text);font-family:var(--mono);font-size:10px;cursor:pointer;width:100%;text-align:left;transition:all .15s}
+.mbtn:hover{background:rgba(255,255,255,.04)}
+.mbtn.act{border-color:var(--cyan);color:var(--cyan);background:rgba(0,212,255,.07)}
+.date-inp{width:100%;background:var(--panel2);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:10px;padding:5px 7px;border-radius:3px;cursor:pointer}
+.sb-info{padding:8px 12px;font-family:var(--mono);font-size:9px;color:var(--muted2);line-height:1.7;letter-spacing:.03em;border-top:1px solid var(--border);margin-top:auto}
+#mw{flex:1;position:relative;overflow:hidden}
+#map{width:100%;height:100%}
+.leaflet-container{background:#080c12!important}
+.leaflet-control-zoom a{background:var(--panel)!important;color:var(--cyan)!important;border-color:var(--border2)!important}
+.leaflet-control-attribution{background:rgba(7,9,13,.85)!important;color:var(--muted2)!important;font-size:8px!important}
+.leaflet-popup-content-wrapper{background:var(--panel)!important;border:1px solid var(--border2)!important;border-radius:4px!important;box-shadow:0 4px 24px rgba(0,0,0,.7)!important}
+.leaflet-popup-tip{background:var(--panel)!important}
+.leaflet-popup-content{font-family:var(--mono)!important;font-size:10.5px!important;color:var(--text)!important;line-height:1.75!important;margin:9px 13px!important}
+.pt{font-size:12px;color:var(--cyan);margin-bottom:5px;letter-spacing:.06em}
+.pr{display:flex;justify-content:space-between;gap:14px}
+.pk{color:var(--muted2)}.pv{color:var(--text)}
+#xh{pointer-events:none;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:300;opacity:.14}
+.modal-bg{display:none;position:absolute;inset:0;z-index:900;background:rgba(7,9,13,.92);align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:var(--panel);border:1px solid var(--border2);border-radius:6px;overflow:hidden;display:flex;flex-direction:column}
+.modal-hdr{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;border-bottom:1px solid var(--border);flex-shrink:0}
+.modal-title{font-family:var(--mono);font-size:11px;letter-spacing:.09em;color:var(--cyan);text-transform:uppercase}
+.modal-x{font-family:var(--mono);font-size:16px;color:var(--muted2);background:none;border:none;cursor:pointer;transition:color .1s}
+.modal-x:hover{color:var(--red)}
+.modal-body{flex:1;overflow:hidden}
+.modal-body iframe{width:100%;height:100%;border:none}
+#cam-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;padding:10px;overflow-y:auto;height:100%}
+.cam-card{background:var(--panel2);border:1px solid var(--border);border-radius:4px;overflow:hidden;cursor:pointer;transition:border-color .15s}
+.cam-card:hover{border-color:var(--border2)}
+.cam-img{width:100%;aspect-ratio:16/9;object-fit:cover;background:#0a0f18;display:block}
+.cam-meta{padding:5px 8px}
+.cam-name{font-family:var(--mono);font-size:9px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cam-loc{font-family:var(--mono);font-size:8px;color:var(--muted2)}
+#stbar{flex-shrink:0;height:26px;display:flex;align-items:center;gap:16px;padding:0 14px;background:var(--panel);border-top:1px solid var(--border);font-family:var(--mono);font-size:9.5px;color:var(--muted2);overflow:hidden;z-index:1000}
+.sb-i{display:flex;align-items:center;gap:5px;white-space:nowrap}
+.sb-v{color:var(--text)}.sb-c{color:var(--cyan)}.sb-g{color:var(--green)}.sb-a{color:var(--amber)}
+.fab{position:absolute;z-index:600;font-family:var(--mono);font-size:10px;letter-spacing:.07em;text-transform:uppercase;padding:7px 12px;border-radius:3px;cursor:pointer;transition:all .15s;background:var(--panel);border:1px solid}
+#fab-vessel{bottom:38px;right:12px;color:#39d98a;border-color:rgba(57,217,138,.35)}
+#fab-vessel:hover{background:rgba(57,217,138,.1);border-color:rgba(57,217,138,.65)}
+#fab-cam{bottom:38px;right:148px;color:var(--amber);border-color:rgba(255,149,0,.35)}
+#fab-cam:hover{background:rgba(255,149,0,.1);border-color:rgba(255,149,0,.65)}
+#fab-rfi{bottom:38px;right:272px;color:var(--purple);border-color:rgba(191,95,255,.35)}
+#fab-rfi:hover{background:rgba(191,95,255,.1);border-color:rgba(191,95,255,.65)}
+#fab-gpsjam{bottom:38px;right:376px;color:var(--red);border-color:rgba(255,59,48,.35)}
+#fab-gpsjam:hover{background:rgba(255,59,48,.1);border-color:rgba(255,59,48,.65)}
+#sl{pointer-events:none;position:fixed;inset:0;z-index:9999;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.025) 2px,rgba(0,0,0,.025) 4px)}
+#boot{position:fixed;inset:0;z-index:99999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px}
+#boot.gone{display:none}
+.boot-logo{font-family:var(--mono);font-size:28px;letter-spacing:.2em;color:var(--cyan);text-shadow:0 0 28px rgba(0,212,255,.55)}
+.boot-log{font-family:var(--mono);font-size:10.5px;color:var(--muted2);width:380px;text-align:left;line-height:2}
+.bl{opacity:0;transition:opacity .25s}.bl.s{opacity:1}
+.bl.ok::after{content:" [OK]";color:var(--green)}
+.bl.warn::after{content:" [WARN]";color:var(--amber)}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spinner{display:inline-block;width:12px;height:12px;border:2px solid var(--border2);border-top-color:var(--cyan);border-radius:50%;animation:spin .6s linear infinite}
+</style>
+</head>
+<body>
+<div id="sl"></div>
+<div id="boot">
+  <svg width="52" height="52" viewBox="0 0 52 52"><circle cx="26" cy="26" r="24" fill="none" stroke="rgba(0,212,255,.3)" stroke-width="1"/><circle cx="26" cy="26" r="16" fill="none" stroke="rgba(0,212,255,.5)" stroke-width="1"/><circle cx="26" cy="26" r="3" fill="#00d4ff"/><line x1="26" y1="2" x2="26" y2="9" stroke="#00d4ff" stroke-width="1.5"/><line x1="26" y1="43" x2="26" y2="50" stroke="#00d4ff" stroke-width="1.5"/><line x1="2" y1="26" x2="9" y2="26" stroke="#00d4ff" stroke-width="1.5"/><line x1="43" y1="26" x2="50" y2="26" stroke="#00d4ff" stroke-width="1.5"/></svg>
+  <div class="boot-logo">PHOENIX EYES</div>
+  <div class="boot-log" id="boot-log"></div>
+</div>
+<div id="app">
+  <div id="hdr">
+    <div style="display:flex;align-items:center;gap:10px;flex-shrink:0">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="13" stroke="rgba(0,212,255,.35)" stroke-width="1"/><circle cx="14" cy="14" r="8" stroke="rgba(0,212,255,.55)" stroke-width="1"/><circle cx="14" cy="14" r="2.5" fill="#00d4ff"/><line x1="14" y1="1" x2="14" y2="5.5" stroke="#00d4ff" stroke-width="1.5"/><line x1="14" y1="22.5" x2="14" y2="27" stroke="#00d4ff" stroke-width="1.5"/><line x1="1" y1="14" x2="5.5" y2="14" stroke="#00d4ff" stroke-width="1.5"/><line x1="22.5" y1="14" x2="27" y2="14" stroke="#00d4ff" stroke-width="1.5"/></svg>
+      <div><div class="logo-t">PHOENIX EYES</div><div class="logo-s">Multi-Layer Intelligence Platform v2</div></div>
+    </div>
+    <div class="pills">
+      <span class="pill pill-g"><span class="dot dg"></span>ADS-B LIVE</span>
+      <span class="pill pill-g"><span class="dot dg"></span>AIS LIVE</span>
+      <span class="pill pill-r"><span class="dot dr"></span>GPS JAM</span>
+      <span class="pill pill-a"><span class="dot da"></span>WINDY</span>
+      <span class="pill pill-p"><span class="dot dp"></span>RFI MONITOR</span>
+    </div>
+    <div id="clk">--:--:-- UTC</div>
+  </div>
+  <div id="body">
+    <div id="sb">
+      <div class="sec">
+        <div class="sec-t">Intelligence Layers</div>
+        <div class="lr" onclick="toggleLayer('flights')">
+          <div class="ll"><div class="ld" style="background:#00d4ff;box-shadow:0 0 4px #00d4ff"></div><div><div class="ln">Air Traffic</div><div class="ls">adsb.fi &middot; OpenSky fallback</div></div></div>
+          <label class="tog" onclick="event.stopPropagation()"><input type="checkbox" id="tog-flights" checked onchange="toggleLayer('flights')"/><div class="tg"></div></label>
+        </div>
+        <div class="lr" onclick="openModal('vessel')">
+          <div class="ll"><div class="ld" style="background:#39d98a;box-shadow:0 0 4px #39d98a"></div><div><div class="ln">Marine Traffic</div><div class="ls">VesselFinder &middot; AIS live</div></div></div>
+          <button style="font-family:var(--mono);font-size:9px;padding:2px 7px;background:rgba(57,217,138,.1);color:#39d98a;border:1px solid rgba(57,217,138,.3);border-radius:2px;cursor:pointer">OPEN</button>
+        </div>
+        <div class="lr" onclick="openModal('gpsjam')">
+          <div class="ll"><div class="ld" style="background:#ff3b30;box-shadow:0 0 4px #ff3b30"></div><div><div class="ln">GPS Jamming</div><div class="ls">GPSJam &middot; GNSS map</div></div></div>
+          <button style="font-family:var(--mono);font-size:9px;padding:2px 7px;background:rgba(255,59,48,.1);color:#ff3b30;border:1px solid rgba(255,59,48,.3);border-radius:2px;cursor:pointer">VIEW</button>
+        </div>
+        <div class="lr" onclick="openModal('rfi')">
+          <div class="ll"><div class="ld" style="background:#bf5fff;box-shadow:0 0 4px #bf5fff"></div><div><div class="ln">RFI / LEO Jamming</div><div class="ls">Stanford SRI &middot; RF intel</div></div></div>
+          <button style="font-family:var(--mono);font-size:9px;padding:2px 7px;background:rgba(191,95,255,.1);color:#bf5fff;border:1px solid rgba(191,95,255,.3);border-radius:2px;cursor:pointer">VIEW</button>
+        </div>
+        <div class="lr" onclick="toggleLayer('quakes')">
+          <div class="ll"><div class="ld" style="background:#ff9500;box-shadow:0 0 4px #ff9500"></div><div><div class="ln">Earthquakes</div><div class="ls">USGS &middot; 24hr live feed</div></div></div>
+          <label class="tog" onclick="event.stopPropagation()"><input type="checkbox" id="tog-quakes" checked onchange="toggleLayer('quakes')"/><div class="tg"></div></label>
+        </div>
+        <div class="lr" onclick="toggleLayer('wind')">
+          <div class="ll"><div class="ld" style="background:#00bfa5;box-shadow:0 0 4px #00bfa5"></div><div><div class="ln">Wind / Weather</div><div class="ls">Windy.com &middot; live overlay</div></div></div>
+          <label class="tog" onclick="event.stopPropagation()"><input type="checkbox" id="tog-wind" onchange="toggleLayer('wind')"/><div class="tg"></div></label>
+        </div>
+        <div class="lr" onclick="openModal('cams')">
+          <div class="ll"><div class="ld" style="background:#ff9500;box-shadow:0 0 4px #ff9500"></div><div><div class="ln">Traffic Cameras</div><div class="ls">NYC DOT &middot; live JPEG feed</div></div></div>
+          <button style="font-family:var(--mono);font-size:9px;padding:2px 7px;background:rgba(255,149,0,.1);color:#ff9500;border:1px solid rgba(255,149,0,.3);border-radius:2px;cursor:pointer">OPEN</button>
+        </div>
+      </div>
+      <div class="sec">
+        <div class="sec-t">Wind Opacity</div>
+        <div class="op-row"><span class="op-lbl">Windy overlay</span><input type="range" min="0" max="100" value="70" id="op-wind" oninput="setWindOp(this.value)"/><span class="op-v" id="opv-wind">70%</span></div>
+      </div>
+      <div class="sec">
+        <div class="sec-t">Base Map</div>
+        <button class="mbtn act" id="btn-dark" onclick="setBase('dark')">&#9632; Dark (CartoDB)</button>
+        <button class="mbtn" id="btn-sat" onclick="setBase('sat')">&#9632; Satellite (ESRI)</button>
+        <button class="mbtn" id="btn-topo" onclick="setBase('topo')">&#9632; Terrain (ESRI)</button>
+      </div>
+      <div class="sec">
+        <div class="sec-t">RFI / Jam Date</div>
+        <input type="date" class="date-inp" id="rfi-date" value="2026-03-22" onchange="updateDate(this.value)"/>
+        <div style="font-family:var(--mono);font-size:8.5px;color:var(--muted2);margin-top:5px;line-height:1.6">Changes GPSJam and Stanford RFI date.</div>
+      </div>
+      <div class="sec">
+        <div class="sec-t">Live Stats</div>
+        <div class="stat-g">
+          <div class="stat-b"><div class="stat-v" id="s-ac">—</div><div class="stat-l">AIRCRAFT</div></div>
+          <div class="stat-b"><div class="stat-v" style="color:var(--amber)" id="s-eq">—</div><div class="stat-l">QUAKES 24H</div></div>
+          <div class="stat-b"><div class="stat-v" style="color:var(--green)" id="s-cam">—</div><div class="stat-l">CAMERAS</div></div>
+          <div class="stat-b"><div class="stat-v" style="color:var(--red)">HIGH</div><div class="stat-l">JAM STATUS</div></div>
+        </div>
+      </div>
+      <div class="sb-info">PHOENIX EYES v2.0<br>Coverage: Global<br>Click aircraft for details<br>[M] Marine [C] Cameras<br>[R] RFI [G] GPS Jam [Esc] close<br><br><span style="color:var(--amber)">All data: public APIs. No auth.</span></div>
+    </div>
+    <div id="mw">
+      <div id="map"></div>
+      <div id="xh"><svg width="70" height="70" viewBox="0 0 70 70" fill="none"><circle cx="35" cy="35" r="33" stroke="#00d4ff" stroke-width=".5"/><circle cx="35" cy="35" r="3.5" stroke="#00d4ff" stroke-width=".5"/><line x1="35" y1="2" x2="35" y2="30" stroke="#00d4ff" stroke-width=".5"/><line x1="35" y1="40" x2="35" y2="68" stroke="#00d4ff" stroke-width=".5"/><line x1="2" y1="35" x2="30" y2="35" stroke="#00d4ff" stroke-width=".5"/><line x1="40" y1="35" x2="68" y2="35" stroke="#00d4ff" stroke-width=".5"/></svg></div>
+      <button class="fab" id="fab-vessel" onclick="openModal('vessel')">&#9875; MARINE</button>
+      <button class="fab" id="fab-cam" onclick="openModal('cams')">&#128249; CAMERAS</button>
+      <button class="fab" id="fab-rfi" onclick="openModal('rfi')">&#128225; RFI</button>
+      <button class="fab" id="fab-gpsjam" onclick="openModal('gpsjam')">&#9889; GPS JAM</button>
+    </div>
+  </div>
+  <div id="stbar">
+    <div class="sb-i">LAT <span class="sb-v sb-c" id="sb-lat">27.000&#176;N</span></div>
+    <div class="sb-i">LON <span class="sb-v sb-c" id="sb-lon">10.000&#176;E</span></div>
+    <div class="sb-i">ZOOM <span class="sb-v" id="sb-z">5</span></div>
+    <div class="sb-i">&#9992; <span class="sb-v sb-c" id="sb-ac">loading...</span></div>
+    <div class="sb-i" style="margin-left:auto">GPS JAM <span class="sb-v sb-a">REGION: HIGH</span></div>
+    <div class="sb-i">SRC <span class="sb-v sb-g">adsb.fi &middot; gpsjam &middot; stanford &middot; nycdot &middot; usgs</span></div>
+  </div>
+</div>
+
+<!-- MODALS -->
+<div class="modal-bg" id="modal-vessel" onclick="closeModal('vessel',event)">
+  <div class="modal" style="width:92%;max-width:1100px;height:82vh" onclick="event.stopPropagation()">
+    <div class="modal-hdr"><span class="modal-title">&#9875; Marine Traffic &mdash; VesselFinder AIS &middot; Global</span><button class="modal-x" onclick="closeModal('vessel')">&#10005;</button></div>
+    <div class="modal-body"><iframe id="if-vessel" src="about:blank" title="VesselFinder"></iframe></div>
+  </div>
+</div>
+
+<div class="modal-bg" id="modal-gpsjam" onclick="closeModal('gpsjam',event)">
+  <div class="modal" style="width:94%;max-width:1200px;height:88vh" onclick="event.stopPropagation()">
+    <div class="modal-hdr"><span class="modal-title">&#9889; GPS / GNSS Jamming Map &mdash; GPSJam.org</span><button class="modal-x" onclick="closeModal('gpsjam')">&#10005;</button></div>
+    <div class="modal-body"><iframe id="if-gpsjam" src="about:blank" title="GPSJam" allowfullscreen></iframe></div>
+  </div>
+</div>
+
+<div class="modal-bg" id="modal-rfi" onclick="closeModal('rfi',event)">
+  <div class="modal" style="width:94%;max-width:1200px;height:88vh" onclick="event.stopPropagation()">
+    <div class="modal-hdr"><span class="modal-title">&#128225; RFI Jamming + LEO Satellite &mdash; Stanford SRI</span><button class="modal-x" onclick="closeModal('rfi')">&#10005;</button></div>
+    <div class="modal-body" style="display:grid;grid-template-columns:1fr 1fr;height:100%">
+      <div style="display:flex;flex-direction:column;border-right:1px solid var(--border)">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--muted2);padding:6px 10px;border-bottom:1px solid var(--border)">GROUND-BASED RFI JAMMING</div>
+        <iframe id="if-rfi" src="about:blank" title="Stanford RFI" style="flex:1;border:none"></iframe>
+      </div>
+      <div style="display:flex;flex-direction:column">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--muted2);padding:6px 10px;border-bottom:1px solid var(--border)">LEO SATELLITE RFI</div>
+        <iframe id="if-leo" src="about:blank" title="Stanford LEO" style="flex:1;border:none"></iframe>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="modal-cams" onclick="closeModal('cams',event)">
+  <div class="modal" style="width:94%;max-width:1300px;height:88vh" onclick="event.stopPropagation()">
+    <div class="modal-hdr">
+      <span class="modal-title">&#128249; Live Traffic Cameras &mdash; NYC DOT <span id="cam-count-hdr" style="color:var(--muted2)"></span></span>
+      <div style="display:flex;align-items:center;gap:8px">
+        <input type="text" id="cam-search" placeholder="Filter cameras..." oninput="filterCams(this.value)" style="background:var(--panel2);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:9.5px;padding:4px 8px;border-radius:3px;width:160px"/>
+        <button class="modal-x" onclick="closeModal('cams')">&#10005;</button>
+      </div>
+    </div>
+    <div class="modal-body"><div id="cam-grid"><div style="grid-column:1/-1;text-align:center;padding:40px;font-family:var(--mono);font-size:11px;color:var(--muted2)"><span class="spinner"></span> Loading cameras...</div></div></div>
+  </div>
+</div>
+
+<script>
+var RFI_DATE='2026-03-22';
+var allCams=[];
+var camsLoaded=false;
+var camsModalOpen=false;
+var camRefreshTimer=null;
+
+// BOOT
+var BOOT=[['Initialising Phoenix Eyes v2.0',200,'ok'],['Loading Leaflet map engine',400,'ok'],['Connecting adsb.fi ADS-B stream',600,'ok'],['Fetching OpenSky Network fallback',750,'ok'],['Loading GPSJam GNSS map module',900,'ok'],['Loading Stanford SRI RFI layers',1050,'warn'],['Initialising VesselFinder AIS',1200,'ok'],['Connecting NYC DOT camera network',1350,'ok'],['Loading USGS earthquake feed',1500,'ok'],['Initialising Windy weather overlay',1600,'ok'],['All systems nominal',1800,'ok']];
+var blog=document.getElementById('boot-log');
+BOOT.forEach(function(b){setTimeout(function(){var el=document.createElement('div');el.className='bl s '+b[2];el.textContent='> '+b[0];blog.appendChild(el);},b[1]);});
+setTimeout(function(){document.getElementById('boot').classList.add('gone');},2100);
+
+// CLOCK
+(function tick(){var n=new Date(),h=n.getUTCHours().toString().padStart(2,'0'),m=n.getUTCMinutes().toString().padStart(2,'0'),s=n.getUTCSeconds().toString().padStart(2,'0');document.getElementById('clk').textContent=h+':'+m+':'+s+' UTC';setTimeout(tick,1000);})();
+
+// MAP
+var BASES={
+  dark:L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'&copy;<a href="https://carto.com">CARTO</a>',subdomains:'abcd',maxZoom:19}),
+  sat:L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{attribution:'&copy;Esri',maxZoom:19}),
+  topo:L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',{attribution:'&copy;Esri',maxZoom:19})
+};
+var map=L.map('map',{center:[20,10],zoom:2,layers:[BASES.dark]});
+var curBase='dark';
+
+function setBase(n){map.removeLayer(BASES[curBase]);map.addLayer(BASES[n]);curBase=n;document.querySelectorAll('.mbtn').forEach(function(b){b.classList.remove('act')});document.getElementById('btn-'+n).classList.add('act');}
+
+map.on('mousemove',function(e){var la=e.latlng.lat,lo=e.latlng.lng;document.getElementById('sb-lat').textContent=(la>=0?la.toFixed(3)+'°N':(-la).toFixed(3)+'°S');document.getElementById('sb-lon').textContent=(lo>=0?lo.toFixed(3)+'°E':(-lo).toFixed(3)+'°W');});
+map.on('zoomend',function(){document.getElementById('sb-z').textContent=map.getZoom();});
+
+// WINDY
+var windyEl=null;
+function showWindy(){if(windyEl)return;var i=document.createElement('iframe');var c=map.getCenter();i.src='https://embed.windy.com/embed2.html?lat='+c.lat.toFixed(2)+'&lon='+c.lng.toFixed(2)+'&zoom='+map.getZoom()+'&level=surface&overlay=wind&menu=&message=&marker=&type=map&location=coordinates&metricWind=default&metricTemp=default&radarRange=-1';i.style.cssText='position:absolute;inset:0;width:100%;height:100%;border:none;opacity:0.7;pointer-events:none;z-index:200;';i.id='windy-if';document.getElementById('mw').appendChild(i);windyEl=i;}
+function hideWindy(){if(windyEl){windyEl.remove();windyEl=null;}}
+function setWindOp(v){document.getElementById('opv-wind').textContent=v+'%';if(windyEl)windyEl.style.opacity=v/100;}
+
+// LAYER TOGGLE
+var layerState={flights:true,quakes:true,wind:false};
+function toggleLayer(n){layerState[n]=!layerState[n];var t=document.getElementById('tog-'+n);if(t)t.checked=layerState[n];if(n==='flights'){layerState.flights?flightGrp.addTo(map):map.removeLayer(flightGrp);}if(n==='quakes'){layerState.quakes?quakeGrp.addTo(map):map.removeLayer(quakeGrp);}if(n==='wind'){layerState.wind?showWindy():hideWindy();}}
+
+// FLIGHTS
+var flightGrp=L.layerGroup().addTo(map);
+var fMarkers={};
+
+function acIcon(hdg,alt){var col=alt>35000?'#00d4ff':alt>20000?'#39ff14':alt>5000?'#ff9500':'#ff3b30';var h=Math.round(hdg||0);var s='<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><g transform="rotate('+h+',10,10)" filter="drop-shadow(0 0 2px '+col+')"><polygon points="10,1 13,15 10,13 7,15" fill="'+col+'" stroke="rgba(0,0,0,.4)" stroke-width=".5"/><polygon points="5,7 2,11 10,9 18,11 15,7" fill="'+col+'" opacity=".8"/></g></svg>';return L.divIcon({html:s,className:'',iconSize:[20,20],iconAnchor:[10,10]});}
+
+function fetchFlights(){
+  var url='https://api.adsb.fi/v1/aircraft';
+  fetch(url).catch(function(){return fetch('https://opensky-network.org/api/states/all');})
+  .then(function(r){return r.ok?r.json():Promise.reject(r.status);})
+  .then(function(data){
+    var ac=data.aircraft||data.ac||[];
+    if(data.states&&!ac.length){ac=(data.states||[]).filter(function(s){return s[6]&&s[5];}).map(function(s){return{hex:s[0],flight:(s[1]||'').trim(),lat:s[6],lon:s[5],alt_baro:Math.round((s[7]||0)*3.281),track:s[10]||0,gs:Math.round((s[9]||0)*1.944)};});}
+    document.getElementById('s-ac').textContent=ac.length;
+    document.getElementById('sb-ac').textContent=ac.length+' tracked';
+    var nh={};ac.forEach(function(a){if(a.hex)nh[a.hex]=true;});
+    Object.keys(fMarkers).forEach(function(h){if(!nh[h]){flightGrp.removeLayer(fMarkers[h]);delete fMarkers[h];}});
+    ac.forEach(function(a){
+      if(!a.lat||!a.lon)return;
+      var la=+a.lat,lo=+a.lon,al=+(a.alt_baro||0),hd=+(a.track||0),sp=+(a.gs||0),cs=(a.flight||a.hex||'?').trim();
+      var ic=acIcon(hd,al);
+      if(fMarkers[a.hex]){fMarkers[a.hex].setLatLng([la,lo]);fMarkers[a.hex].setIcon(ic);}
+      else{var mk=L.marker([la,lo],{icon:ic});mk.bindPopup('<div class="pt">&#9992; '+cs+'</div><div class="pr"><span class="pk">ICAO</span><span class="pv">'+(a.hex||'—').toUpperCase()+'</span></div><div class="pr"><span class="pk">ALT</span><span class="pv">'+Math.round(al).toLocaleString()+' ft</span></div><div class="pr"><span class="pk">SPD</span><span class="pv">'+Math.round(sp)+' kts</span></div><div class="pr"><span class="pk">HDG</span><span class="pv">'+Math.round(hd)+'°</span></div>');if(layerState.flights)flightGrp.addLayer(mk);fMarkers[a.hex]=mk;}
+    });
+  }).catch(function(e){console.warn('flights err',e);});
+}
+fetchFlights();setInterval(fetchFlights,15000);
+
+// EARTHQUAKES
+var quakeGrp=L.layerGroup().addTo(map);
+function fetchQuakes(){
+  fetch('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson')
+  .then(function(r){return r.json();})
+  .then(function(d){
+    quakeGrp.clearLayers();
+    var f=d.features||[];document.getElementById('s-eq').textContent=f.length;
+    f.forEach(function(q){var c=q.geometry.coordinates,mg=q.properties.mag||0,pl=q.properties.place||'';if(!c||!c[0]||!c[1])return;var col=mg>=5?'#ff3b30':'#ff9500';var r=Math.max(4,Math.min(18,mg*3));var mk=L.circleMarker([c[1],c[0]],{radius:r,color:col,fillColor:col,fillOpacity:.35,weight:1.5});mk.bindPopup('<div class="pt">&#127755; M'+mg.toFixed(1)+'</div><div class="pr"><span class="pk">PLACE</span><span class="pv">'+pl+'</span></div><div class="pr"><span class="pk">DEPTH</span><span class="pv">'+(c[2]||0).toFixed(1)+' km</span></div>');if(layerState.quakes)quakeGrp.addLayer(mk);});
+  }).catch(function(e){console.warn('quakes err',e);});
+}
+fetchQuakes();setInterval(fetchQuakes,120000);
+
+// CAMERAS
+function loadCameras(){
+  if(camsLoaded)return;camsLoaded=true;
+  fetch('https://webcams.nyctmc.org/api/cameras')
+  .then(function(r){return r.json();})
+  .then(function(cams){
+    allCams=cams;
+    document.getElementById('s-cam').textContent=cams.length;
+    document.getElementById('cam-count-hdr').textContent='('+cams.length+' cameras)';
+    renderCams(allCams);
+  }).catch(function(e){
+    console.warn('cameras err',e);
+    document.getElementById('cam-grid').innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;font-family:var(--mono);font-size:11px;color:var(--muted2)">Camera API blocked by CORS from file:// — run via Python server for full access.<br><br><code style="color:var(--cyan)">python3 server.py</code></div>';
+  });
+}
+
+function renderCams(list){
+  var grid=document.getElementById('cam-grid');
+  if(!list.length){grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:30px;font-family:var(--mono);font-size:11px;color:var(--muted2)">No cameras match filter.</div>';return;}
+  grid.innerHTML='';
+  list.slice(0,60).forEach(function(cam){
+    var id=cam.id||cam.cameraId||'';
+    var name=cam.name||cam.cameraName||'Camera';
+    var loc=cam.boroughCode||cam.borough||'NYC';
+    var imgSrc='https://webcams.nyctmc.org/api/cameras/'+id+'/image?t='+Date.now();
+    var card=document.createElement('div');
+    card.className='cam-card';
+    var img=document.createElement('img');img.className='cam-img';img.src=imgSrc;img.alt=name;img.addEventListener('error',function(){this.style.background='#0c141e';});img.addEventListener('click',function(){zoomCam(cam);});var meta=document.createElement('div');meta.className='cam-meta';meta.innerHTML='<div class="cam-name">'+name+'</div><div class="cam-loc">'+loc+'</div>';card.appendChild(img);card.appendChild(meta);
+    grid.appendChild(card);
+  });
+  if(camRefreshTimer)clearInterval(camRefreshTimer);
+  camRefreshTimer=setInterval(function(){
+    if(!camsModalOpen)return;
+    document.querySelectorAll('.cam-img').forEach(function(img,i){var cam=list[i];if(cam){var id=cam.id||cam.cameraId||'';img.src='https://webcams.nyctmc.org/api/cameras/'+id+'/image?t='+Date.now();}});
+  },5000);
+}
+
+function filterCams(q){var lq=(q||'').toLowerCase();renderCams(lq?allCams.filter(function(c){return((c.name||c.cameraName||'')+(c.boroughCode||c.borough||'')).toLowerCase().includes(lq);}):allCams);}
+
+function zoomCam(cam){if(cam.latitude&&cam.longitude){closeModal('cams');map.flyTo([cam.latitude,cam.longitude],14,{duration:1.5});}}
+
+// MODALS
+var vLoaded=false,gjLoaded=false,rfLoaded=false;
+function openModal(name){
+  document.getElementById('modal-'+name).classList.add('open');
+  if(name==='vessel'&&!vLoaded){vLoaded=true;var doc='<!DOCTYPE html><html><head><meta charset="UTF-8"><style>*{margin:0;padding:0}html,body{width:100%;height:100%;background:#080c12}</style></head><body><'+'script>var width="100%";var height="100%";var latitude="20";var longitude="10";var zoom="3";var names=true;<\/script><'+'script src="https://www.vesselfinder.com/aismap.js"><\/script></body></html>';document.getElementById('if-vessel').srcdoc=doc;}
+  if(name==='gpsjam'&&!gjLoaded){gjLoaded=true;document.getElementById('if-gpsjam').src='https://gpsjam.org/?lat=20&lon=10&z=2&date='+RFI_DATE;}
+  if(name==='rfi'&&!rfLoaded){rfLoaded=true;document.getElementById('if-rfi').src='https://rfi.stanford.edu/?date='+RFI_DATE+'&mode=jamming&granularity=daily&heatmap=true';document.getElementById('if-leo').src='https://rfi.stanford.edu/?date='+RFI_DATE+'&mode=leo&granularity=daily&heatmap=true';}
+  if(name==='cams'){camsModalOpen=true;loadCameras();}
+}
+function closeModal(name,evt){if(evt&&evt.target!==document.getElementById('modal-'+name))return;document.getElementById('modal-'+name).classList.remove('open');if(name==='cams')camsModalOpen=false;}
+function updateDate(d){RFI_DATE=d;gjLoaded=false;rfLoaded=false;var gf=document.getElementById('if-gpsjam');var rf=document.getElementById('if-rfi');var lf=document.getElementById('if-leo');if(gf.src!=='about:blank')gf.src='https://gpsjam.org/?lat=20&lon=10&z=2&date='+d;if(rf.src!=='about:blank'){rf.src='https://rfi.stanford.edu/?date='+d+'&mode=jamming&granularity=daily&heatmap=true';lf.src='https://rfi.stanford.edu/?date='+d+'&mode=leo&granularity=daily&heatmap=true';}}
+
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'){['vessel','gpsjam','rfi','cams'].forEach(function(n){document.getElementById('modal-'+n).classList.remove('open');});camsModalOpen=false;}
+  if(!e.ctrlKey&&!e.metaKey){if(e.key==='m'||e.key==='M')openModal('vessel');if(e.key==='c'||e.key==='C')openModal('cams');if(e.key==='r'||e.key==='R')openModal('rfi');if(e.key==='g'||e.key==='G')openModal('gpsjam');}
+});
+</script>
+</body>
+</html>
