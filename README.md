@@ -47,11 +47,11 @@ To run it, clone the repo and execute python3 server.py  (thats it, no environme
 
 # 1. Clone git clone https://github.com/RisingCyber/phoenix-eyes
 
-# 2. cd phoenix-eyes-v2
+# 2. unzip phoenix-eyes-v2
 
-# 3. unzip phoenix-eyes-v2.zip 
+# 3. cd phoenix-eyes-v2.zip 
 
-# 4. python3 server.py
+# 4. python3 phoenix-eyes-v2/server.py
 
 # 5. Open http://localhost:8080   
 
